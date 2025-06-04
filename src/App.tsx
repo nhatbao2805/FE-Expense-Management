@@ -12,6 +12,8 @@ import DashboardHome from './pages/DashboardHome';
 import Login from './pages/Login';
 import CreateInvoice from './pages/Invoice/CreateInvoice';
 import ListInvoice from './pages/Invoice/ListInvoice';
+import CategoryList from './pages/Category/CategoryList';
+import CreateCategory from './pages/Category/CreateCategory';
 
 export default function App() {
   const accessToken = localStorage.getItem('access_token');
@@ -30,6 +32,8 @@ export default function App() {
             <Route index element={<DashboardHome />} />
             <Route path="/invoice/new" element={<CreateInvoice />} />
             <Route path="/invoice/list" element={<ListInvoice />} />
+            <Route path="/invoice/category/list" element={<CategoryList />} />
+            <Route path="/invoice/category/new" element={<CreateCategory />} />
           </Route>
         )}
       </Routes>

@@ -3,7 +3,7 @@ import { useForm, Controller } from 'react-hook-form';
 
 interface InvoiceFormData {
   title: string;
-  amount: number;
+  amount: string;
   category?: string;
   note?: string;
   invoiceDate: string; // dùng input type="date" nên string
@@ -17,6 +17,7 @@ const CreateInvoce: React.FC = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     control,
     formState: { errors },
   } = useForm<InvoiceFormData>({
@@ -25,6 +26,22 @@ const CreateInvoce: React.FC = () => {
       invoiceDate: new Date().toISOString().split('T')[0], // ngày hiện tại
     },
   });
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    const formatted = formatCurrency(raw);
+    setValue('amount', formatted);
+  };
+
+  const formatCurrency = (value: string) => {
+    // Xoá tất cả ký tự không phải số
+    const numberValue = value.replace(/[^\d]/g, '');
+
+    if (!numberValue) return '';
+
+    // Format lại: VD 1234567 -> 1,234,567
+    return Number(numberValue).toLocaleString('vi-VN');
+  };
 
   const onSubmit = (data: InvoiceFormData) => {
     console.log('Dữ liệu hóa đơn gửi đi:', data);
@@ -41,18 +58,18 @@ const CreateInvoce: React.FC = () => {
       {/* Title */}
       <div>
         <label className="block mb-1 font-medium" htmlFor="title">
-          Tiêu đề <span className="text-red-500">*</span>
+          Tên hoá đơn <span className="text-red-500">*</span>
         </label>
         <input
           id="title"
           type="text"
-          {...register('title', { required: 'Tiêu đề là bắt buộc' })}
+          {...register('title', { required: 'Tên hoá đơn là bắt buộc' })}
           className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${
             errors.title
               ? 'border-red-500 focus:ring-red-500'
               : 'border-gray-300 focus:ring-blue-500'
           }`}
-          placeholder="Nhập tiêu đề hóa đơn"
+          placeholder="Nhập tên hóa đơn"
         />
         {errors.title && (
           <p className="text-red-500 mt-1">{errors.title.message}</p>
@@ -66,12 +83,18 @@ const CreateInvoce: React.FC = () => {
         </label>
         <input
           id="amount"
-          type="number"
-          step="0.01"
+          type="text"
+          inputMode="numeric"
           {...register('amount', {
             required: 'Số tiền là bắt buộc',
-            min: { value: 0.01, message: 'Số tiền phải lớn hơn 0' },
+            validate: (value) => {
+              const numeric = Number(value.replace(/,/g, ''));
+              if (isNaN(numeric) || numeric <= 0)
+                return 'Số tiền phải lớn hơn 0';
+              return true;
+            },
           })}
+          onChange={handleAmountChange}
           className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${
             errors.amount
               ? 'border-red-500 focus:ring-red-500'
